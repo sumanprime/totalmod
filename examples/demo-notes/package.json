@@ -25,7 +25,7 @@
     "@totalmod/server": "workspace:*",
     "@totalmod/widget": "workspace:*",
     "drizzle-orm": "0.45.4",
-    "next": "16.4.3",
+    "next": "16.4.5",
     "postgres": "3.4.9",
     "react": "19.3.1",
     "react-dom": "19.3.1"
