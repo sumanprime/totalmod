@@ -1,0 +1,39 @@
+{
+  "name": "totalmod",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "(AGPL-3.0-only OR LicenseRef-totalmod-Commercial)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sumanprime/totalmod.git",
+    "directory": "packages/cli"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "totalmod": "./src/bin.ts"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "COMMERCIAL-LICENSE.md",
+    "templates"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "bin": {
+      "totalmod": "./dist/bin.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node -e \"for (const f of ['LICENSE', 'COMMERCIAL-LICENSE.md']) require('fs').copyFileSync('../../' + f, f)\" && node -e \"require('fs').cpSync('../../templates', 'templates', { recursive: true })\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@totalmod/core": "workspace:*",
+    "@totalmod/telemetry": "workspace:*"
+  }
+}

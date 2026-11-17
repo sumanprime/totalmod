@@ -1,0 +1,34 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`init > adds totalmod to a Next.js App Router app 1`] = `
+[
+  ".github/workflows/totalmod-build.yml",
+  ".github/workflows/totalmod-release.yml",
+  "app/api/totalmod/[...totalmod]/route.ts",
+  "app/layout.tsx",
+  "app/page.tsx",
+  "components/totalmod-widget.tsx",
+  "flags/totalmod.flags.json",
+  "lib/totalmod.ts",
+  "package.json",
+  "seed/mock.ts",
+  "totalmod.config.yaml",
+]
+`;
+
+exports[`init > puts app files under src/ when the app uses src/app 1`] = `
+[
+  ".github/workflows/totalmod-build.yml",
+  ".github/workflows/totalmod-release.yml",
+  "flags/totalmod.flags.json",
+  "package.json",
+  "pnpm-lock.yaml",
+  "seed/mock.ts",
+  "src/app/api/totalmod/[...totalmod]/route.ts",
+  "src/app/layout.tsx",
+  "src/app/page.tsx",
+  "src/components/totalmod-widget.tsx",
+  "src/lib/totalmod.ts",
+  "totalmod.config.yaml",
+]
+`;

@@ -1,0 +1,19 @@
+{
+  "name": "@totalmod/action",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@totalmod/core": "workspace:*",
+    "@totalmod/flags": "workspace:*",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "yaml": "2.9.1"
+  }
+}

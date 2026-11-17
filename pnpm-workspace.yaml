@@ -1,0 +1,15 @@
+packages:
+  - "packages/*"
+  - "examples/*"
+  - "scripts/*"
+  - "action"
+  - "infra/*"
+
+# Packages allowed to run install scripts (pnpm blocks all others).
+allowBuilds:
+  esbuild: true
+  # Only checks its own version; not needed.
+  protobufjs: false
+
+minimumReleaseAgeExclude:
+  - "@cloudflare/workers-types@5.20261026.1"

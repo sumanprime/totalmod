@@ -1,0 +1,45 @@
+{
+  "name": "@totalmod/demo-notes",
+  "license": "AGPL-3.0-only",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "start:migrated": "node scripts/serve.ts",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "next build && playwright test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node scripts/migrate.ts",
+    "demo:gif": "next build && cross-env RECORD_DEMO=1 playwright test record-demo --project production && node scripts/encode-gif.ts",
+    "local:up": "next build && pm2 startOrRestart ecosystem.config.cjs --update-env",
+    "local:down": "pm2 delete ecosystem.config.cjs",
+    "local:logs": "pm2 logs"
+  },
+  "dependencies": {
+    "@electric-sql/pglite": "0.5.11",
+    "@totalmod/core": "workspace:*",
+    "@totalmod/flags": "workspace:*",
+    "@totalmod/server": "workspace:*",
+    "@totalmod/widget": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "next": "16.4.3",
+    "postgres": "3.4.9",
+    "react": "19.3.1",
+    "react-dom": "19.3.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite-socket": "0.2.14",
+    "@playwright/test": "1.64.1",
+    "@types/pngjs": "6.0.5",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "cross-env": "10.1.0",
+    "drizzle-kit": "0.31.11",
+    "gifenc": "1.0.3",
+    "pm2": "7.1.1",
+    "pngjs": "7.0.0"
+  }
+}

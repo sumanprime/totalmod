@@ -1,0 +1,140 @@
+name: totalmod build
+description: Policy check, Claude Code build on a branch, path check, then a draft PR. For issues labelled totalmod:build and totalmod:iterate PR comments.
+inputs:
+  anthropic_api_key:
+    description: Anthropic API key for the build agent. The only secret the agent gets.
+    required: true
+  github_token:
+    description: >-
+      Token for pushing the branch, opening the draft PR and commenting. Use a GitHub App
+      installation token or a fine-grained PAT (contents, issues, pull requests: write): pushes
+      made with the default GITHUB_TOKEN do not trigger your CI.
+    required: true
+  trusted_actors:
+    description: Comma-separated GitHub logins allowed to file build issues and post iterate comments (the account your totalmod server uses).
+    required: true
+  config_dir:
+    description: Directory holding totalmod.config.yaml, relative to the repository root.
+    default: "."
+  model:
+    description: Model for the build agent. Defaults to `model` in totalmod.config.yaml.
+    default: ""
+  max_turns:
+    description: Agent turn cap per run.
+    default: "60"
+  install_command:
+    description: Command that installs the project's dependencies. Detected from the lockfile when empty.
+    default: ""
+  test_command:
+    description: Command the action runs after the build for the PR's risk summary. Defaults to `<package manager> test`.
+    default: ""
+  task:
+    description: "`build` (issues and iterate comments) or `remove-flag` (started by the release workflow)."
+    default: build
+  req_id:
+    description: "Request id for the remove-flag task."
+    default: ""
+outputs:
+  pr_branch:
+    description: The request branch (totalmod/req-<id>).
+    value: ${{ steps.policy.outputs.branch }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "24"
+
+    - name: Install totalmod
+      shell: bash
+      working-directory: ${{ github.action_path }}/..
+      run: |
+        corepack enable
+        pnpm install --frozen-lockfile --filter "@totalmod/action..."
+
+    - id: policy
+      name: "Job A: policy check (no model)"
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        TOTALMOD_TRUSTED_ACTORS: ${{ inputs.trusted_actors }}
+        TOTALMOD_CONFIG_DIR: ${{ inputs.config_dir }}
+        TOTALMOD_MODEL: ${{ inputs.model }}
+        TOTALMOD_MAX_TURNS: ${{ inputs.max_turns }}
+        TOTALMOD_TASK: ${{ inputs.task }}
+        TOTALMOD_REQ_ID: ${{ inputs.req_id }}
+      run: node "$GITHUB_ACTION_PATH/src/main.ts" policy
+
+    - id: branch
+      name: Check out the request branch
+      if: steps.policy.outputs.skip == 'false'
+      shell: bash
+      env:
+        BRANCH: ${{ steps.policy.outputs.branch }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: |
+        if git fetch origin "$BRANCH" 2>/dev/null; then
+          git checkout -B "$BRANCH" FETCH_HEAD
+        else
+          git checkout -b "$BRANCH"
+        fi
+        git fetch origin "$DEFAULT_BRANCH"
+        echo "base=$(git merge-base HEAD FETCH_HEAD)" >> "$GITHUB_OUTPUT"
+
+    - name: Install project dependencies
+      if: steps.policy.outputs.skip == 'false'
+      shell: bash
+      env:
+        INSTALL: ${{ inputs.install_command }}
+      run: |
+        if [ -n "$INSTALL" ]; then bash -c "$INSTALL"
+        elif [ -f pnpm-lock.yaml ]; then corepack enable && pnpm install --frozen-lockfile
+        elif [ -f yarn.lock ]; then corepack enable && yarn install --frozen-lockfile
+        elif [ -f bun.lock ] || [ -f bun.lockb ]; then bun install --frozen-lockfile
+        elif [ -f package-lock.json ]; then npm ci
+        fi
+
+    - id: claude
+      name: "Job B: build with Claude Code"
+      if: steps.policy.outputs.skip == 'false'
+      uses: anthropics/claude-code-action@v1
+      with:
+        anthropic_api_key: ${{ inputs.anthropic_api_key }}
+        github_token: ${{ inputs.github_token }}
+        prompt: ${{ steps.policy.outputs.prompt }}
+        claude_args: ${{ steps.policy.outputs.claude_args }}
+
+    - id: paths
+      name: "Job C: path check (no model)"
+      if: steps.claude.outcome == 'success'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        TOTALMOD_CONFIG_DIR: ${{ inputs.config_dir }}
+        BASE: ${{ steps.branch.outputs.base }}
+      run: node "$GITHUB_ACTION_PATH/src/main.ts" paths "$BASE"
+
+    - name: Run the project's tests for the risk summary
+      if: steps.paths.outcome == 'success'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        TOTALMOD_TEST_COMMAND: ${{ inputs.test_command }}
+      run: node "$GITHUB_ACTION_PATH/src/main.ts" test
+
+    - name: Push the branch and open the PR
+      if: steps.paths.outcome == 'success'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        TOTALMOD_CONFIG_DIR: ${{ inputs.config_dir }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: node "$GITHUB_ACTION_PATH/src/main.ts" publish "$DEFAULT_BRANCH"
+
+    - name: Record spend
+      if: always() && steps.policy.outputs.skip == 'false' && steps.claude.outcome != 'skipped'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        EXECUTION_FILE: ${{ steps.claude.outputs.execution_file }}
+      run: node "$GITHUB_ACTION_PATH/src/main.ts" spend "$EXECUTION_FILE"

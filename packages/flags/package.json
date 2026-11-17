@@ -1,0 +1,49 @@
+{
+  "name": "@totalmod/flags",
+  "version": "0.2.0",
+  "type": "module",
+  "license": "(AGPL-3.0-only OR LicenseRef-totalmod-Commercial)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sumanprime/totalmod.git",
+    "directory": "packages/flags"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./file": "./src/file.ts"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "COMMERCIAL-LICENSE.md"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "./file": {
+        "types": "./dist/file.d.ts",
+        "default": "./dist/file.js"
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && node -e \"for (const f of ['LICENSE', 'COMMERCIAL-LICENSE.md']) require('fs').copyFileSync('../../' + f, f)\"",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "1.14.6",
+    "@openfeature/core": "1.12.0",
+    "@openfeature/flagd-provider": "0.18.0",
+    "@openfeature/server-sdk": "1.23.0",
+    "@totalmod/core": "workspace:*"
+  }
+}

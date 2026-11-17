@@ -1,0 +1,17 @@
+# totalmod.config.yaml: example policy (also used by the demo app).
+# Enforced by deterministic CI checks, not by prompts.
+model: claude-sonnet-5-5
+requesters: all # all | paying | a list of user ids
+budget:
+  perRequestUsd: 3
+  monthlyUsd: 100
+iterations:
+  max: 3
+paths:
+  allowed: ["app/**", "components/**", "lib/**"]
+  blocked: ["**/auth/**", "**/billing/**", "**/migrations/**", ".env*", ".github/**"]
+  maxChangedLines: 600
+flags:
+  file: flags/totalmod.flags.json
+  removeAfterDays: 14
+telemetry: true # set false or DO_NOT_TRACK=1 to disable

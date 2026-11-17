@@ -1,0 +1,39 @@
+name: totalmod release
+description: >-
+  Runs after a human acts on a totalmod PR. Merge turns the flag on for the requester; the
+  labels totalmod:rollout-<n>, totalmod:ga and totalmod:off roll it out or switch it off;
+  closing without merging deletes the branch. On a schedule, picks the next GA flag that is
+  due for removal (output cleanup_req) for the build action's remove-flag task.
+inputs:
+  github_token:
+    description: Token that can push to the default branch (flags file) and comment, label and close issues.
+    required: true
+  config_dir:
+    description: Directory holding totalmod.config.yaml, relative to the repository root.
+    default: "."
+outputs:
+  cleanup_req:
+    description: Request id whose flag is due for removal, if any.
+    value: ${{ steps.release.outputs.cleanup_req }}
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "24"
+
+    - name: Install totalmod
+      shell: bash
+      working-directory: ${{ github.action_path }}/../..
+      run: |
+        corepack enable
+        pnpm install --frozen-lockfile --filter "@totalmod/action..."
+
+    - id: release
+      name: Apply the release step
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        TOTALMOD_CONFIG_DIR: ${{ inputs.config_dir }}
+        DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      run: node "$GITHUB_ACTION_PATH/../src/main.ts" release "$DEFAULT_BRANCH"

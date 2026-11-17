@@ -1,0 +1,14 @@
+# Deploy with `pnpm --filter @totalmod/telemetry-worker deploy` (needs a Cloudflare account).
+# Then point the default endpoint (DEFAULT_TELEMETRY_ENDPOINT in @totalmod/telemetry) at it,
+# e.g. by routing telemetry.totalmod.dev to this worker.
+name = "totalmod-telemetry"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+
+[[analytics_engine_datasets]]
+binding = "EVENTS"
+dataset = "totalmod_events"
+
+[[analytics_engine_datasets]]
+binding = "BADGES"
+dataset = "totalmod_badges"
