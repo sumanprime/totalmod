@@ -41,6 +41,10 @@ export async function createProductionDb(): Promise<Db> {
   if (!url) {
     throw new Error("DATABASE_URL is not set. Set it, or run with TOTALMOD_MODE=mock.");
   }
-  const client = postgres(url, { max: Number(process.env.DATABASE_POOL_MAX ?? 10) });
+  const client = postgres(url, {
+    max: Number(process.env.DATABASE_POOL_MAX ?? 10),
+    // Poolers like Neon's run in transaction mode, where prepared statements can break.
+    prepare: false,
+  });
   return drizzlePostgres({ client, schema });
 }

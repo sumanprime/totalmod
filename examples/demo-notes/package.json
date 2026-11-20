@@ -3,11 +3,15 @@
   "license": "AGPL-3.0-only",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "start:migrated": "node scripts/serve.ts",
+    "vercel-build": "node scripts/vercel-build.ts",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "next build && playwright test",

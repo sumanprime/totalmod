@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getDb } from "./db";
 import { type User, users } from "./db/schema";
-import { getMode } from "./mode";
+import { getMode, isScriptedDemo } from "./mode";
 
 const COOKIE = "demo_session";
 
@@ -40,12 +40,44 @@ export async function getCurrentUser(): Promise<User | null> {
   if (!userId) return null;
   const db = await getDb();
   const [user] = await db.select().from(users).where(eq(users.id, userId));
+  if (!user && getMode() === "mock" && userId.startsWith("preview:")) {
+    // Another server instance started the session, with its own in-memory database.
+    return ensurePreviewUser(userId);
+  }
   return user ?? null;
+}
+
+/** Preview users carry the requester's plan and role in their id, so any instance can recreate them. */
+export function previewUserId(requester: string, plan: string, role: string): string {
+  return `preview:${plan}:${role}:${requester}`;
+}
+
+export async function ensurePreviewUser(id: string): Promise<User> {
+  const [, plan = "free", role = "member", requester = ""] = id.split(":");
+  const db = await getDb();
+  await db
+    .insert(users)
+    .values({ id, name: `You (preview ${requester.slice(-6)})`, plan, role })
+    .onConflictDoNothing();
+  const [user] = await db.select().from(users).where(eq(users.id, id));
+  if (!user) throw new Error("Could not create the preview user.");
+  return user;
 }
 
 /** Finds the user with this name, or creates a free member, and starts a session. */
 export async function signInByName(name: string): Promise<User> {
   const db = await getDb();
+  if (isScriptedDemo()) {
+    // Visitors share the hosted demo's database: never hand one of them another visitor's notes.
+    const id = randomUUID();
+    const [user] = await db
+      .insert(users)
+      .values({ id, name: `${name} (${id.slice(0, 4)})` })
+      .returning();
+    if (!user) throw new Error("Could not create the user.");
+    await startSession(user.id);
+    return user;
+  }
   const [existing] = await db.select().from(users).where(eq(users.name, name));
   const user =
     existing ?? (await db.insert(users).values({ id: randomUUID(), name }).returning())[0];

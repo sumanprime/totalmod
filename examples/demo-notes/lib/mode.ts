@@ -10,3 +10,8 @@ export function getMode(): Mode {
   if (mode === "mock") return "mock";
   throw new Error(`TOTALMOD_MODE must be "mock" or "production", got "${mode}".`);
 }
+
+/** The hosted demo: Claude, GitHub and the build are simulated (see lib/scripted-demo.ts). */
+export function isScriptedDemo(): boolean {
+  return process.env.DEMO_SCRIPTED === "1";
+}

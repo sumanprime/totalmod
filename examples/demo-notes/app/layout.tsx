@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { TotalmodWidget } from "@/components/totalmod-widget";
 import { getCurrentUser } from "@/lib/auth";
-import { getMode } from "@/lib/mode";
+import { getMode, isScriptedDemo } from "@/lib/mode";
 import { signOutAction } from "./actions";
 import "./globals.css";
 
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const mock = getMode() === "mock";
+  const scripted = isScriptedDemo() && !mock;
   const user = await getCurrentUser();
 
   return (
@@ -25,6 +26,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           <p className="banner" role="status">
             Preview with mock data. Nothing here is real, and nothing you do here reaches
             production.
+          </p>
+        )}
+        {scripted && (
+          <p className="banner" role="note">
+            A scripted demo: the AI and the build are simulated, so every request becomes the same
+            word-count feature. Notes are kept in a shared demo database, so don&apos;t add anything
+            private.
           </p>
         )}
         <header className="header">
@@ -43,7 +51,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           )}
         </header>
         <main className="main">{children}</main>
-        {user && !mock && <TotalmodWidget />}
+        {user && !mock && <TotalmodWidget {...(scripted ? { pollMs: 2_000 } : {})} />}
       </body>
     </html>
   );

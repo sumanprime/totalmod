@@ -3,9 +3,7 @@
 // in mock mode the database is in-memory PGlite.
 import { verifyPreviewToken } from "@totalmod/core";
 import { redirect } from "next/navigation";
-import { startSession } from "@/lib/auth";
-import { getDb } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { ensurePreviewUser, previewUserId, startSession } from "@/lib/auth";
 import { getMode } from "@/lib/mode";
 
 const MESSAGES = {
@@ -27,12 +25,7 @@ export async function GET(request: Request) {
   }
 
   const { requester, plan = "free", role = "member" } = result.payload;
-  const id = `preview-${requester}`;
-  const db = await getDb();
-  await db
-    .insert(users)
-    .values({ id, name: `You (preview ${requester.slice(-6)})`, plan, role })
-    .onConflictDoNothing();
-  await startSession(id);
+  const user = await ensurePreviewUser(previewUserId(requester, plan, role));
+  await startSession(user.id);
   redirect("/notes");
 }
