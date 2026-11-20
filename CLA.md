@@ -1,8 +1,6 @@
 # totalmod Contributor License Agreement
 
-> **Draft.** Have a lawyer review this agreement before relying on it.
-
-Thank you for contributing to totalmod ("the Project"), maintained by sumanprime ("the Maintainer"). This agreement lets the Maintainer keep offering the Project under both the GNU AGPL-3.0 and a commercial license. You keep the copyright in your contributions.
+Thank you for contributing to totalmod ("the Project"), maintained by Suman Sarkar ("the Maintainer"). This agreement lets the Maintainer keep offering the Project under both the GNU AGPL-3.0 and a commercial license. You keep the copyright in your contributions.
 
 By signing (commenting the sentence the CLA bot asks for on your pull request), you agree to the following for every contribution you submit to the Project, now or in the future:
 
