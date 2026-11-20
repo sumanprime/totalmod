@@ -47,45 +47,6 @@ For a real interviewer without an API key, use a model on your machine. See [Try
 TOTALMOD_LLM=ollama TOTALMOD_MODEL=qwen3.8 pnpm local:up
 ```
 
-## Hosted demo on Vercel
-
-A public demo that needs no Anthropic key, GitHub repo or build agent. With `DEMO_SCRIPTED=1`, [`lib/scripted-demo.ts`](lib/scripted-demo.ts) answers as the interviewer from [`lib/scripted-answers.ts`](lib/scripted-answers.ts), fakes GitHub in-process, and stands in for the build: a few seconds after a spec is confirmed, it sends the app the same webhooks GitHub and Vercel would. So visitors go through the whole loop: interview, private preview, a fix round, approval and the merge. Every request becomes the same word-count feature, and a banner says so.
-
-Sign-in always creates a new account in this mode, because visitors share the database.
-
-It takes two Vercel projects from this repository, both with **Root Directory** `examples/demo-notes`:
-
-| Project | What                                          | Database                |
-| ------- | --------------------------------------------- | ----------------------- |
-| demo    | The app visitors sign in to                   | Neon                    |
-| preview | The mock-data preview the "Try it" link opens | None (in-memory PGlite) |
-1. **Create the preview project.** Import the repo, set the Root Directory, then add these environment variables and deploy:
-
-   | Variable                       | Value                      |
-   | ------------------------------ | -------------------------- |
-   | `TOTALMOD_MODE`                | `mock`                     |
-   | `TOTALMOD_PREVIEW_SECRET`      | a long random string       |
-   | `ENABLE_EXPERIMENTAL_COREPACK` | `1` (uses the pinned pnpm) |
-
-   Give it no database variables: mock mode refuses to read them.
-
-2. **Create the demo project** the same way, then add Neon under **Storage → Create Database → Neon**. That sets `DATABASE_URL` (pooled) and `DATABASE_URL_UNPOOLED`, which the build uses to apply migrations. Add:
-
-   | Variable                       | Value                                                         |
-   | ------------------------------ | ------------------------------------------------------------- |
-   | `DEMO_SCRIPTED`                | `1`                                                           |
-   | `DEMO_PREVIEW_URL`             | the preview project's URL, e.g. `https://preview.example.com` |
-   | `TOTALMOD_PREVIEW_SECRET`      | the same string as the preview project                        |
-   | `DEMO_SESSION_SECRET`          | another long random string                                    |
-   | `DO_NOT_TRACK`                 | `1`, so the demo sends no telemetry                           |
-   | `ENABLE_EXPERIMENTAL_COREPACK` | `1`                                                           |
-
-   Deploy. `pnpm vercel-build` migrates the database, then builds. No `ANTHROPIC_API_KEY` or GitHub variables are needed.
-
-3. **Domains (optional).** Add a subdomain to each project under **Settings → Domains**, such as `demo.example.com` and `preview.example.com`, then update `DEMO_PREVIEW_URL` and redeploy the demo project.
-
-The preview's in-memory database belongs to one server instance, so notes added there can disappear between visits. Visitors' notes and requests on the demo project stay in Neon until you clear them.
-
 ## Auth
 
 `lib/auth.ts` is a demo adapter: sign in with any name, and the session is an HMAC-signed user id in a cookie. It is not real authentication. totalmod reads the signed-in user through this adapter.
