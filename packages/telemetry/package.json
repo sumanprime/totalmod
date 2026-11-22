@@ -1,6 +1,6 @@
 {
   "name": "@totalmod/telemetry",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Anonymous, opt-out usage counts for totalmod. No request text, code, prompts or file paths.",
   "type": "module",
   "license": "(AGPL-3.0-only OR LicenseRef-totalmod-Commercial)",

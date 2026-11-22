@@ -1,5 +1,12 @@
 # @totalmod/flags
 
+## 0.3.0
+
+### Patch Changes
+
+- Updated dependencies [[`9b61e1b`](https://github.com/sumanprime/totalmod/commit/9b61e1bcb80d71defa7ccd48059d5e7990a6738a)]:
+  - @totalmod/core@0.3.0
+
 ## 0.2.0
 
 ### Patch Changes
