@@ -2,6 +2,7 @@
 // The production-mode server points ANTHROPIC_BASE_URL and TOTALMOD_GITHUB_API_URL here.
 // GET /__recorded returns everything received, so tests can inspect the issue payload.
 import { createServer } from "node:http";
+import { scriptedAnswer } from "../lib/scripted-answers.ts";
 
 const port = Number(process.env.MOCK_APIS_PORT ?? 3300);
 const recorded = {
@@ -12,47 +13,6 @@ const recorded = {
   /** Anonymous telemetry the production server sent. */
   telemetry: [] as { event: string; props: Record<string, number> }[],
 };
-
-/** The reviser's answer to "fix this": one rewritten change, never the raw feedback. */
-const delta = {
-  kind: "delta",
-  changes: ["Show the word count in a smaller, lighter grey font"],
-  declineReason: null,
-};
-
-const questions = {
-  kind: "questions",
-  questions: [
-    {
-      id: "where",
-      text: "Where should the word count appear?",
-      options: ["Under each note in the list", "In the editor"],
-    },
-    { id: "count", text: "What should it count?", options: ["Words", "Words and characters"] },
-  ],
-  spec: null,
-  declineReason: null,
-};
-
-/** The spec title carries the request's nonce so parallel tests can find their own issue. */
-function spec(nonce: string) {
-  return {
-    kind: "spec",
-    questions: [],
-    spec: {
-      title: `Word count under each note ${nonce}`.trim(),
-      userStory:
-        "As a writer I want to see how many words each note has so I can keep posts short.",
-      acceptanceCriteria: [
-        "Each note in the list shows its word count",
-        "Empty notes show 0 words",
-      ],
-      uiLocation: "Notes list, under each note",
-      outOfScope: ["Character counts", "Admin pages"],
-    },
-    declineReason: null,
-  };
-}
 
 function message(output: unknown) {
   return {
@@ -89,12 +49,7 @@ createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/v1/messages") {
     recorded.messages.push(body);
     const turn = String(body?.messages?.[0]?.content ?? "");
-    if (turn.includes("<feedback>")) return send(200, message(delta));
-    const nonce = turn.match(/nonce-[a-z0-9]+/)?.[0] ?? "";
-    return send(
-      200,
-      message(turn.includes("<answers>none yet</answers>") ? questions : spec(nonce)),
-    );
+    return send(200, message(scriptedAnswer(turn)));
   }
 
   const issue = url.pathname.match(/^\/repos\/([^/]+)\/([^/]+)\/issues$/);

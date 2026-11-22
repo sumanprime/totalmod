@@ -25,6 +25,12 @@ pnpm test:e2e                  # build, then Playwright against both modes
 
 `test:e2e` needs Chromium once (`pnpm exec playwright install chromium`). It uses `E2E_DATABASE_URL` as the production database when set (CI uses a Postgres service). Without it, `pglite-server` serves an in-memory database over the Postgres protocol.
 
+## Scripted mode
+
+With `DEMO_SCRIPTED=1` the app needs no Anthropic key, GitHub repo or build agent. It's what `npx totalmod demo` runs (see [packages/cli/src/demo.ts](../../packages/cli/src/demo.ts)). [`lib/scripted-demo.ts`](lib/scripted-demo.ts) answers as the interviewer from [`lib/scripted-answers.ts`](lib/scripted-answers.ts) (the same answers `e2e/mock-apis.ts` gives) and fakes GitHub in-process. A few seconds after a spec is confirmed, it sends the app the webhooks GitHub and Vercel would, so the whole loop runs: interview, private preview, a fix round, approval and the merge. Without `DATABASE_URL` the app uses an empty in-memory PGlite.
+
+Every request becomes the same word-count feature. The simulated build writes no code: the feature is already in the app behind [`lib/demo-feature.ts`](lib/demo-feature.ts), on only in scripted mode. The preview (mock mode, also with `DEMO_SCRIPTED=1`) shows it from the first try-it link, in a smaller grey font after a fix round (the round is in the link's path, `/round/<n>/totalmod/preview`). In the app it turns on for a user once their own request is merged.
+
 ## Run everything locally
 
 From the repo root, one command builds the demo and starts it under [pm2](https://pm2.keymetrics.io/):

@@ -7,7 +7,7 @@ import { drizzle as drizzlePostgres } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { seed } from "../../seed/mock";
 import { installMockGuard, MockModeViolation } from "../mock-guard";
-import { getMode } from "../mode";
+import { getMode, isScriptedDemo } from "../mode";
 import * as schema from "./schema";
 
 export type Db = PgDatabase<PgQueryResultHKT, typeof schema>;
@@ -18,8 +18,20 @@ export const migrationsFolder = join(process.cwd(), "migrations");
 const cache = globalThis as typeof globalThis & { __demoNotesDb?: Promise<Db> };
 
 export function getDb(): Promise<Db> {
-  cache.__demoNotesDb ??= getMode() === "mock" ? createMockDb() : createProductionDb();
+  cache.__demoNotesDb ??=
+    getMode() === "mock"
+      ? createMockDb()
+      : isScriptedDemo() && !process.env.DATABASE_URL
+        ? createScriptedDemoDb()
+        : createProductionDb();
   return cache.__demoNotesDb;
+}
+
+/** The scripted demo without DATABASE_URL: in-memory PGlite, empty, gone when the server stops. */
+export async function createScriptedDemoDb(): Promise<Db> {
+  const db = drizzlePglite({ client: new PGlite(), schema });
+  await migrate(db, { migrationsFolder });
+  return db;
 }
 
 /** In-memory PGlite with the real migrations and the mock seed. Nothing leaves the process. */

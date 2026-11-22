@@ -2,7 +2,7 @@
 // and checks they work from node_modules (plain JS, no TypeScript, templates and prompts included).
 // Run after `pnpm build`: `pnpm pack:smoke`. Set TOTALMOD_KEEP_PACK=1 to keep the temp project for inspection.
 import { execFileSync } from "node:child_process";
-import { cpSync, existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -70,6 +70,17 @@ const init = run("node", [bin, "init"], app, { DO_NOT_TRACK: "1" });
 check(
   "totalmod init",
   init.includes("created  totalmod.config.yaml") && existsSync(join(app, "lib/totalmod.ts")),
+);
+const demo = join(app, "node_modules", "totalmod", "demo");
+const demoManifest = existsSync(join(demo, "package.json"))
+  ? readFileSync(join(demo, "package.json"), "utf8")
+  : "";
+check(
+  "totalmod demo app bundled",
+  demoManifest.includes('"name": "totalmod-demo"') &&
+    !demoManifest.includes("workspace:") &&
+    existsSync(join(demo, "lib", "scripted-demo.ts")) &&
+    !existsSync(join(demo, "e2e")),
 );
 check(
   "no TypeScript sources shipped",

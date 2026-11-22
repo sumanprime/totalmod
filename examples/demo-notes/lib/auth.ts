@@ -4,8 +4,9 @@ import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { getDb } from "./db";
-import { type User, users } from "./db/schema";
-import { getMode } from "./mode";
+import { notes, type User, users } from "./db/schema";
+import { sampleNotes } from "./demo-feature";
+import { getMode, isScriptedDemo } from "./mode";
 
 const COOKIE = "demo_session";
 
@@ -50,6 +51,7 @@ export async function signInByName(name: string): Promise<User> {
   const user =
     existing ?? (await db.insert(users).values({ id: randomUUID(), name }).returning())[0];
   if (!user) throw new Error("Could not create the user.");
+  if (!existing && isScriptedDemo()) await db.insert(notes).values(sampleNotes(user.id));
   await startSession(user.id);
   return user;
 }

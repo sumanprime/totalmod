@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { notes } from "@/lib/db/schema";
+import { countWords, wordCountFeature } from "@/lib/demo-feature";
 import { createNoteAction } from "../actions";
 
 const date = new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeZone: "UTC" });
@@ -23,6 +24,7 @@ export default async function Notes({
     .from(notes)
     .where(eq(notes.userId, user.id))
     .orderBy(desc(notes.updatedAt), desc(notes.id));
+  const wordCount = await wordCountFeature(user);
 
   return (
     <>
@@ -52,6 +54,12 @@ export default async function Notes({
                   {note.title}
                 </Link>
                 {note.body && <p className="note-body">{note.body}</p>}
+                {wordCount && (
+                  <p className={wordCount.round > 0 ? "word-count word-count-light" : "word-count"}>
+                    {countWords(note.body)} {countWords(note.body) === 1 ? "word" : "words"}{" "}
+                    <span className="built-tag">Built from your request</span>
+                  </p>
+                )}
                 <p className="muted small">Updated {date.format(note.updatedAt)}</p>
               </li>
             ))}

@@ -10,3 +10,4 @@ coverage/
 packages/*/LICENSE
 packages/*/COMMERCIAL-LICENSE.md
 packages/cli/templates/
+packages/cli/demo/
