@@ -14,7 +14,7 @@ totalmod is a loop kit for Next.js SaaS apps:
 4. The requester tries it on a private preview with **mock data** and asks for fixes.
 5. **You** merge. Only then does it run on real data, behind a flag that turns on for that user first.
 
-> Status: v0.2, early.
+> Status: v0.2, early. **[Try the demo](https://demo.totalmod.dev)** · **[Install in 5 minutes](#quickstart-3-minutes)**
 
 ## Quickstart (3 minutes)
 
