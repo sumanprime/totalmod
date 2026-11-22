@@ -13,3 +13,7 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - "@cloudflare/workers-types@5.20261026.1"
+
+# drizzle-kit pulls esbuild 0.18 through @esbuild-kit; 0.25.0 fixes GHSA-67mh-4wv8-2f99.
+overrides:
+  "@esbuild-kit/core-utils>esbuild": ^0.25.0

@@ -29,7 +29,7 @@ const INJECTION_MARKERS: [name: string, pattern: RegExp][] = [
     /\b(ignore|disregard|forget|override)\b.{0,40}\b(instructions?|prompts?|rules?|above|previous)\b/i,
   ],
   ["role play", /\b(you are now|act as|system prompt|developer mode|jailbreak)\b/i],
-  ["markup", /<\/?[a-z][\w-]*[^>]*>|<!--|-->|```/i],
+  ["markup", /<\/?[a-z][\w-]*[^>]*>|<!--|--!?>|```/i],
   ["shell command", /\b(curl|wget|bash|sh -c|rm -rf|chmod|eval|exec)\b|\|\s*(sh|bash)\b/i],
   ["external link", /https?:\/\//i],
 ];
