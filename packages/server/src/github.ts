@@ -27,8 +27,8 @@ export interface IssueMeta {
  * Spec strings already passed `checkSpec`; this is the last line before GitHub.
  */
 export function sanitize(text: string): string {
+  // Escaping every < and > also neutralises comment markers (<!--, -->, --!>) in any form.
   return text
-    .replace(/<!--|-->/g, "")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/@(?=\w)/g, "@​")
@@ -150,13 +150,18 @@ export async function commentOnIssue(target: GithubTarget, number: number, body:
   await githubCall(target, "POST", `/repos/${target.repo}/issues/${number}/comments`, { body });
 }
 
-const VERDICT_ROW = /^.*<!-- totalmod:verdict -->.*$/m;
+const VERDICT_MARKER = "<!-- totalmod:verdict -->";
 
-/** Rewrites the verdict row of the risk summary the build action put in the PR body. */
+/**
+ * Rewrites the verdict row of the risk summary the build action put in the PR body.
+ * A plain line scan, not a regex: the body comes from GitHub and a regex here can backtrack.
+ */
 export function withVerdict(body: string, verdict: string): string {
-  return VERDICT_ROW.test(body)
-    ? body.replace(VERDICT_ROW, `| Requester verdict | ${verdict} <!-- totalmod:verdict --> |`)
-    : body;
+  const lines = body.split("\n");
+  const row = lines.findIndex((line) => line.includes(VERDICT_MARKER));
+  if (row === -1) return body;
+  lines[row] = `| Requester verdict | ${verdict} ${VERDICT_MARKER} |`;
+  return lines.join("\n");
 }
 
 /** Thumbs-up: the draft PR becomes ready for the founder's review, with the verdict recorded. */

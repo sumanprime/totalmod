@@ -83,4 +83,13 @@ describe("withVerdict", () => {
     );
     expect(withVerdict("no summary here", "approved")).toBe("no summary here");
   });
+
+  it("stays fast on a body that repeats the marker", () => {
+    const body = "<!-- totalmod:verdict -->".repeat(50_000);
+    const started = performance.now();
+    expect(withVerdict(body, "approved")).toBe(
+      "| Requester verdict | approved <!-- totalmod:verdict --> |",
+    );
+    expect(performance.now() - started).toBeLessThan(200);
+  });
 });
