@@ -10,3 +10,11 @@ export function getMode(): Mode {
   if (mode === "mock") return "mock";
   throw new Error(`TOTALMOD_MODE must be "mock" or "production", got "${mode}".`);
 }
+
+/**
+ * The scripted demo (`npx totalmod demo`): Claude, GitHub and the build are simulated in-process
+ * (see lib/scripted-demo.ts), so the whole loop runs with no keys or accounts.
+ */
+export function isScriptedDemo(): boolean {
+  return process.env.DEMO_SCRIPTED === "1";
+}

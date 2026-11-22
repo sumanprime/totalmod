@@ -201,3 +201,31 @@ button.danger {
   color: var(--danger);
   margin: 0;
 }
+
+/* The scripted demo's "built" feature (lib/demo-feature.ts). */
+.word-count {
+  margin: 4px 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+/* After the fix round "smaller, lighter grey font". */
+.word-count-light {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.built-tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 500;
+  opacity: 1;
+  vertical-align: 1px;
+}

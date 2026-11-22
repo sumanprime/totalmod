@@ -19,7 +19,8 @@
     "README.md",
     "LICENSE",
     "COMMERCIAL-LICENSE.md",
-    "templates"
+    "templates",
+    "demo"
   ],
   "publishConfig": {
     "access": "public",
@@ -28,7 +29,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.build.json && node -e \"for (const f of ['LICENSE', 'COMMERCIAL-LICENSE.md']) require('fs').copyFileSync('../../' + f, f)\" && node -e \"require('fs').cpSync('../../templates', 'templates', { recursive: true })\"",
+    "build": "tsc -p tsconfig.build.json && node -e \"for (const f of ['LICENSE', 'COMMERCIAL-LICENSE.md']) require('fs').copyFileSync('../../' + f, f)\" && node -e \"require('fs').cpSync('../../templates', 'templates', { recursive: true })\" && node scripts/bundle-demo.ts",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
