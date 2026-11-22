@@ -14,7 +14,7 @@ totalmod is a loop kit for Next.js SaaS apps:
 4. The requester tries it on a private preview with **mock data** and asks for fixes.
 5. **You** merge. Only then does it run on real data, behind a flag that turns on for that user first.
 
-> Status: v0.2, early. **[Try the demo](https://demo.totalmod.dev)** · **[Install in 5 minutes](#quickstart-3-minutes)**
+> Status: v0.2, early. **[Try the demo](https://demo.totalmod.dev)** · **[Install in 5 minutes](#quickstart-5-minutes)**
 
 ## Try it in one command
 
@@ -24,7 +24,7 @@ npx totalmod demo
 
 It sets up a small notes app in `./totalmod-demo`, installs and builds it, and runs it on <http://localhost:3000>. No API key, GitHub repo or Vercel account: the interviewer's answers are scripted, GitHub is faked in-process, and the build is simulated. Sign in with any name, click **Request a feature**, and follow your request through the questions, the spec, your private preview on mock data (port 3001), a fix round and the merge. Every request becomes the same word-count feature. The first run takes a minute or two; data is kept in memory. Use `--port` to pick other ports, and `--dir` for another folder.
 
-## Quickstart (3 minutes)
+## Quickstart (5 minutes)
 
 In a Next.js App Router app:
 
